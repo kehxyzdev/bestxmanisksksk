@@ -89,7 +89,7 @@ end
 
 local Window = Fluent:CreateWindow({
     Title = "TsuoHub Universal",
-    SubTitle = "develope by mani (discord.gg/tsuoscripts)",
+    SubTitle = "develope by mANI- (discord.gg/tsuoscripts)",
     TabWidth = 160,
     Size = UDim2.new(0, windowWidth, 0, windowHeight),
     Acrylic = false,                       -- The blur may be detectable, setting this to false disables blur entirely
@@ -105,7 +105,7 @@ local Tabs = {
     }),
     AIM = Window:AddTab({
         Title = "Aim",
-        Icon = "eye"
+        Icon = "chevron-up-circle"
     }),
     ESP = Window:AddTab({
         Title = "Esp",
@@ -113,7 +113,7 @@ local Tabs = {
     }),
     Player = Window:AddTab({
         Title = "LocalPlayer",
-        Icon = "pipette"
+        Icon = "layers-2"
     }),
     Misc = Window:AddTab({
         Title = "Misc",
@@ -121,23 +121,139 @@ local Tabs = {
     }),
 }
 
-Tabs.Credits:AddButton({
-    Title = "Tsuo Hub Discord",
-    Description = "Copy Link Discord Server",
+local Options = Fluent.Options
+
+--variaveis
+local Mode = "enemies"
+local auto = true
+
+--funçoes
+    local Cam = workspace.CurrentCamera
+    
+    local state = false
+    local C = nil
+    local reach = 200
+    function lookAt(target, eye)
+        Cam.CFrame = CFrame.new(target, eye)
+    end
+    
+    function getClosestPlayer(trg_part)
+        local nearest = nil
+        if Mode == "others" then
+        for i,v in pairs(game.Players:GetPlayers()) do
+            if v ~= game.Players.LocalPlayer and v.Character.Humanoid.Health ~= 0 and v.Character:FindFirstChildOfClass"ForceField" == nil and game.Players.LocalPlayer.Character and v.Character and v.Character:FindFirstChild(trg_part) then
+                if game.Players.LocalPlayer.Character:FindFirstChild(trg_part) then
+                    local Distance = (v.Character:FindFirstChildOfClass("Part").Position - game.Players.LocalPlayer.Character:FindFirstChildOfClass("Part").Position).magnitude
+                        if Distance <= reach then
+                        nearest = v
+                    end
+                end
+            end
+        end
+        return nearest
+        elseif Mode == "enemies" then
+        
+        for i,v in pairs(game.Players:GetPlayers()) do
+            if v ~= game.Players.LocalPlayer and v.Character.Humanoid.Health ~= 0 and v.Character:FindFirstChildOfClass"ForceField" == nil and v.TeamColor.Name ~= game.Players.LocalPlayer.TeamColor.Name and game.Players.LocalPlayer.Character and v.Character and v.Character:FindFirstChild(trg_part) then
+                if game.Players.LocalPlayer.Character:FindFirstChild(trg_part) then
+                    local Distance = (v.Character:FindFirstChildOfClass("Part").Position - game.Players.LocalPlayer.Character:FindFirstChildOfClass("Part").Position).magnitude
+                        if Distance <= reach then
+                        nearest = v
+                    end
+                end
+            end
+        end
+        return nearest
+        end
+    end
+    
+    local function modeDetector() 
+if auto==true then
+if not game:GetService"Teams": FindFirstChildOfClass "Team" then
+Mode = "others"
+    else
+        Mode = "enemies"
+    end
+    else
+        
+    end
+end
+
+do
+
+    Tabs.Credits:AddButton({
+        Title = "Tsuo Hub Discord",
+        Description = "Copy Link Discord Server",
+        Callback = function()
+            setclipboard("https://discord.com/invite/tsuoscripts")
+        end
+    })
+
+    local AimBot = Tabs.AIM:AddToggle("AimBot", {Title = "Aim Bot", Default = false })
+
+    AimBot:OnChanged(function(bool)
+     if bool then
+    state = true
+
+    C = game:GetService("RunService").RenderStepped:Connect(function()
+        local closest = getClosestPlayer("Head")
+        modeDetector() 
+        if state and closest and closest.Character:FindFirstChild("Head") then
+            lookAt(Cam.CFrame.p, closest.Character:FindFirstChild("Head").Position)
+        end
+    end)
+    else
+    state = false
+    end
+    end)
+
+    local FOV = Tabs.AIM:AddSlider("FOV", {
+        Title = "FOV",
+        Description = "",
+        Default = 20,
+        Min = 1,
+        Max = 200,
+        Rounding = 1,
+        Callback = function(Value)
+            reach = Value
+        end
+    })
+
+    local SelectMode = Tabs.AIM:AddDropdown("SelectMode", {
+        Title = "Select Mode",
+        Values = {"auto", "enemies only", "orthers"},
+        Multi = false,
+    })
+
+    SelectMode:OnChanged(function(o)
+    if o == "enemies only" then
+    Mode = "enemies"
+            auto=false
+    elseif o == "others" then
+     Mode = "others"
+            auto=false
+        elseif o == "auto" then
+            auto = true
+    end
+end)
+    
+Tabs.ESP:AddButton({
+    Title = "Esp Box",
+    Description = "",
     Callback = function()
-        setclipboard("https://discord.com/invite/tsuoscripts")
+        loadstring(game:HttpGet(
+            'https://raw.githubusercontent.com/eusoueuhahaha/espdkkdkdskd/main/boxksksksks'))()
     end
 })
 
-do
-    Tabs.AIM:AddButton({
-        Title = "AimBot Menu TsuoHub",
-        Description = "",
-        Callback = function()
-            loadstring(game:HttpGet('https://raw.githubusercontent.com/kehxyzdev/aimbot/main/aim'))()
-                 print("button pressed")
-         end    
-   })
+Tabs.ESP:AddButton({
+    Title = "Esp Box & line",
+    Description = "",
+    Callback = function()
+        loadstring(game:HttpGet(
+            'https://raw.githubusercontent.com/eusoueuhahaha/espdjkdkikdskdkdkd/main/lkinemsksksksk'))()
+    end
+})
 
    Tabs.ESP:AddButton({
         Title = "Esp Name",
@@ -182,6 +298,8 @@ do
             print(Value)
         end
     })
+
+    
 
     Tabs.Misc:AddButton({
         Title = "Chat Spy",
@@ -229,6 +347,15 @@ do
     })
 
     Tabs.Misc:AddButton({
+        Title = "Chat Translator (Vietnamese)",
+        Description = "",
+        Callback = function()
+             loadstring(game:HttpGet('https://raw.githubusercontent.com/kehxyzdev/viet/main/chat'))()
+                  print("button pressed")
+          end    
+    })
+
+    Tabs.Misc:AddButton({
         Title = "Anti Fling",
         Description = "",
         Callback = function()
@@ -246,4 +373,3 @@ do
         end
     })
 end
-
